@@ -1,0 +1,14 @@
+﻿<Properties StartupConfiguration="{863EF64D-509C-4053-9ACD-8C6832E25B93}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Seguranca Status">
+    <Files>
+      <File FileName="Seguranca Status" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Seguranca-WebApi PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>
