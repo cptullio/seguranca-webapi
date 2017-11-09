@@ -1,6 +1,11 @@
 ﻿<Properties StartupConfiguration="{863EF64D-509C-4053-9ACD-8C6832E25B93}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Seguranca Status">
     <Files>
+      <File FileName="Seguranca-WebApi/Startup.cs" Line="41" Column="50" />
+      <File FileName="Seguranca-WebApi/Program.cs" Line="1" Column="1" />
+      <File FileName="Seguranca-WebApi/ForIdentity/Usuario.cs" Line="18" Column="6" />
+      <File FileName="Seguranca-WebApi/ForIdentity/Contexto.cs" Line="12" Column="10" />
+      <File FileName="Seguranca-WebApi/Controllers/AccountController.cs" Line="35" Column="1" />
       <File FileName="Seguranca Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
