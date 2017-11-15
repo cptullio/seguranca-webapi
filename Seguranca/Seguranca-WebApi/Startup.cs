@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,8 +14,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Seguranca_WebApi.ForIdentity;
+using Seguranca_WebApi.ForSwagger;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Seguranca_WebApi
@@ -37,9 +41,27 @@ namespace Seguranca_WebApi
 
             });
 
-            services.AddIdentity<Usuario, IdentityRole>()
+            services.AddIdentity<Usuario, IdentityRole>(o => {
+                o.Password.RequireDigit = false;
+                o.Password.RequireUppercase = false;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireNonAlphanumeric = false;
+                o.User.RequireUniqueEmail = true;
+            })
             .AddEntityFrameworkStores<Contexto>()
             .AddDefaultTokenProviders();
+
+
+            services.ConfigureApplicationCookie(config =>
+            {
+                config.Events = new CookieAuthenticationEvents
+                {
+                    OnRedirectToLogin = ctx => {
+                        ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        return Task.FromResult(0);
+                    }
+                };
+            });
 
             services.AddAuthentication(o =>
             {
@@ -47,15 +69,18 @@ namespace Seguranca_WebApi
             })
             .AddJwtBearer(options =>
             {
-                options.Authority = "localhost:4200";
-                options.Audience = "localhost:4200";
+                
+                options.Authority = "localhost:5000";
+                options.Audience = "localhost:5000";
+                options.Configuration = new OpenIdConnectConfiguration();
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidateIssuerSigningKey = true,
-                    ValidateIssuer = true,
+                    ValidateIssuerSigningKey = false,
+                    ValidateIssuer = false,
                     ValidateLifetime = true,
-                    ValidIssuer = "localhost:4200",
+                    ValidIssuer = "localhost:5000",
+                    
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SuperSecretKey_GetThisFromAppSettings"))
                 };
             });
@@ -63,6 +88,7 @@ namespace Seguranca_WebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                c.OperationFilter<SwaggerFilter>();
             });
         }
 
