@@ -86,8 +86,8 @@ namespace Seguranca_WebApi
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidateIssuerSigningKey = false,
-                    ValidateIssuer = false,
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
                     ValidateLifetime = true,
                     ValidIssuer = "localhost:5000",
                     
