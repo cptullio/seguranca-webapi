@@ -51,12 +51,22 @@ namespace Seguranca_WebApi
             .AddEntityFrameworkStores<Contexto>()
             .AddDefaultTokenProviders();
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy => policy.RequireClaim("IsAdmin","true"));
+            });
 
             services.ConfigureApplicationCookie(config =>
             {
                 config.Events = new CookieAuthenticationEvents
                 {
-                    OnRedirectToLogin = ctx => {
+                    OnRedirectToLogin = ctx =>
+                    {
+                        ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        return Task.FromResult(0);
+                    },
+
+                    OnRedirectToAccessDenied = ctx =>{
                         ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                         return Task.FromResult(0);
                     }

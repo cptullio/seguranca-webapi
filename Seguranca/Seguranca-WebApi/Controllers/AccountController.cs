@@ -35,7 +35,7 @@ namespace Seguranca_WebApi.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> Register([FromBody]RegisterUser user)
+        public async Task<IActionResult> Register([FromBody]RegisterUser user, [FromQuery] bool isAdmin )
         {
             if (ModelState.IsValid)
             {
@@ -44,8 +44,21 @@ namespace Seguranca_WebApi.Controllers
                 usuario.NomeCompleto = user.NomeCompleto;
                 usuario.UserName = user.Usuario;
                 usuario.Email = user.Email;
+
                 var result =   await _userManager.CreateAsync(usuario,user.Senha);
                 if (result.Succeeded){
+                    if (isAdmin)
+                    {
+                        var claims = new List<Claim>();
+                        claims.Add(new Claim("isAdmin","true"));
+
+                        var resultClaim = await _userManager.AddClaimsAsync(usuario, claims);
+                        if (resultClaim.Succeeded)
+                        {
+                            return Ok(new { msg = "Administrador criado com sucesso" });
+                        }
+                    }
+                        
                     return Ok(new { msg = "Usuário criado com sucesso" });
                 }
                 return BadRequest(result.Errors);
@@ -66,14 +79,10 @@ namespace Seguranca_WebApi.Controllers
                     var passwordResult = await _userManager.CheckPasswordAsync(result, user.Senha);
                     if (passwordResult)
                     {
-
-                        var claims = new List<Claim>
-                        {
-                            new Claim(JwtRegisteredClaimNames.GivenName, result.NomeCompleto),
-                            new Claim(JwtRegisteredClaimNames.NameId, result.UserName),
-                            new Claim(JwtRegisteredClaimNames.Email, result.Email)
-
-                        };
+                        var claims = await _userManager.GetClaimsAsync(result);
+                        claims.Add(new Claim("Nome",result.NomeCompleto));
+                        claims.Add(new Claim("Email",result.Email));
+                        claims.Add(new Claim("UserName",result.UserName));
                         var token = new JwtSecurityToken(
                             issuer: "localhost:5000",
                             audience: "localhost:5000",
@@ -96,10 +105,21 @@ namespace Seguranca_WebApi.Controllers
 
 
         [HttpGet("[action]")]
+        [Authorize(policy:"Admin")]
+        public IActionResult TesteAutorizacaoAdministrador()
+        {
+            var emailClaim = Request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Email");
+            return Ok(new {Email = emailClaim.Value});
+        }
+
+        [HttpGet("[action]")]
         [Authorize]
         public IActionResult TesteAutorizacao()
         {
-            return Ok(new {nome = "nome"});
+            
+            var emailClaim = Request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Email");
+            return Ok(new { Email = emailClaim.Value });
+           
         }
 
     }
