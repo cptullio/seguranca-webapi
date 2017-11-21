@@ -66,6 +66,99 @@ namespace Seguranca_WebApi.Controllers
             return BadRequest(ModelState);
         }
 
+
+        [HttpGet("[action]")]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+
+        private async Task<string> GenerateTokenAsync(Usuario usuario)
+        {
+            var claims = await _userManager.GetClaimsAsync(usuario);
+            claims.Add(new Claim("Nome", usuario.NomeCompleto));
+            claims.Add(new Claim("Email", usuario.Email));
+            claims.Add(new Claim("UserName", usuario.UserName));
+            var token = new JwtSecurityToken(
+                issuer: "localhost:5000",
+                audience: "localhost:5000",
+
+                  claims: claims,
+                  expires: DateTime.UtcNow.AddMinutes(30),
+                  signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SuperSecretKey_GetThisFromAppSettings")),
+                                            SecurityAlgorithms.HmacSha256));
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+
+        }
+
+
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+            if (result.Succeeded)
+            {
+                Usuario usuario = await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email));
+
+                return Ok(GenerateTokenAsync(usuario));
+            }
+            else
+            {
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+               
+                Usuario usuario = await _userManager.FindByEmailAsync(email);
+
+                if (usuario != null)
+                {
+                    var identityResult = await _userManager.AddLoginAsync(usuario, info);
+                    if (identityResult.Succeeded)
+                    {
+                        return Ok(GenerateTokenAsync(usuario));
+                    }
+                    else
+                    {
+                        return BadRequest(identityResult.Errors);
+                    }
+                }
+                else
+                {
+                    var nome = info.Principal.FindFirstValue(ClaimTypes.Name);
+                    Usuario newUsuario = new Usuario();
+                    newUsuario.NomeCompleto = nome;
+                    newUsuario.UserName = email.Split('@')[0];
+                    newUsuario.Email = email;
+
+                    var resultCreate = await _userManager.CreateAsync(newUsuario);
+                    if (resultCreate.Succeeded)
+                    {
+                        var identityResult = await _userManager.AddLoginAsync(usuario, info);
+                        if (identityResult.Succeeded)
+                        {
+                            return Ok(GenerateTokenAsync(usuario));
+                        }
+                        else
+                        {
+                            return BadRequest(identityResult.Errors);
+                        }
+
+                    }
+                    else
+                    {
+                        return BadRequest(resultCreate.Errors);
+                    }
+                }
+            }
+        }
+
+
         [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody]LoginUser user)
         {
@@ -79,22 +172,7 @@ namespace Seguranca_WebApi.Controllers
                     var passwordResult = await _userManager.CheckPasswordAsync(result, user.Senha);
                     if (passwordResult)
                     {
-                        var claims = await _userManager.GetClaimsAsync(result);
-                        claims.Add(new Claim("Nome",result.NomeCompleto));
-                        claims.Add(new Claim("Email",result.Email));
-                        claims.Add(new Claim("UserName",result.UserName));
-                        var token = new JwtSecurityToken(
-                            issuer: "localhost:5000",
-                            audience: "localhost:5000",
-
-                              claims: claims,
-                              expires: DateTime.UtcNow.AddMinutes(30),
-                              signingCredentials: new SigningCredentials(
-                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SuperSecretKey_GetThisFromAppSettings")),
-                                                        SecurityAlgorithms.HmacSha256));
-                        
-
-                        return Ok(new JwtSecurityTokenHandler().WriteToken(token));
+                        return Ok(GenerateTokenAsync(result));
                     }
                 }
                 return BadRequest(new {msg = "Usuário ou Senha Inválido."}); 

@@ -93,6 +93,9 @@ namespace Seguranca_WebApi
                     
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SuperSecretKey_GetThisFromAppSettings"))
                 };
+            }).AddGoogle(option => {
+                option.ClientId = "12447165354-trdk2ofb08t0psbagomcru5vtet1uloa.apps.googleusercontent.com";
+                option.ClientSecret = "QEQ3iD3pBFi44uxi5zc57kyj";
             });
             services.AddMvc();
             services.AddSwaggerGen(c =>

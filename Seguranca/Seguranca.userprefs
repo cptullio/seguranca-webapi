@@ -1,17 +1,19 @@
 ﻿<Properties StartupConfiguration="{863EF64D-509C-4053-9ACD-8C6832E25B93}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Seguranca Status">
     <Files>
-      <File FileName="Seguranca-WebApi/Controllers/AccountController.cs" Line="120" Column="1" />
-      <File FileName="Seguranca-WebApi/Startup.cs" Line="73" Column="19" />
+      <File FileName="Seguranca-WebApi/Startup.cs" Line="107" Column="9" />
       <File FileName="Seguranca-WebApi/Model/RegisterUser.cs" Line="1" Column="14" />
       <File FileName="Seguranca-WebApi/Model/LoginUser.cs" Line="20" Column="10" />
       <File FileName="Seguranca-WebApi/Controllers/ValuesController.cs" Line="1" Column="1" />
+      <File FileName="Seguranca-WebApi/Controllers/AccountController.cs" Line="111" Column="1" />
       <File FileName="Seguranca Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/carlos/Desktop/seguranca-webapi/Seguranca/Seguranca-WebApi/Controllers/AccountController.cs" relfile="Seguranca-WebApi/Controllers/AccountController.cs" line="104" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MultiItemStartupConfigurations />
